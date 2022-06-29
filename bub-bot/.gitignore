@@ -10,8 +10,8 @@ node_modules/
 .settings/
 bot-data/
 package-lock.json
-appsettings.json
 tokens.json
+appsettings.json
 
 # Executables
 *.swf
