@@ -11,6 +11,7 @@ node_modules/
 bot-data/
 package-lock.json
 appsettings.json
+tokens.json
 
 # Executables
 *.swf

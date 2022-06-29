@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace bub_bot
 {
-    public class appsettings
+    public interface IBotService
     {
-        public string token { get; set; }
+        Task MainAsync();
     }
 }

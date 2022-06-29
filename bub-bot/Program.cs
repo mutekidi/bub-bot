@@ -5,6 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 
 namespace bub_bot
 {
@@ -12,35 +14,26 @@ namespace bub_bot
     {
         static void Main(string[] args)
         {
-            MainAsync().GetAwaiter().GetResult();
+            var host = CreateDefaultBuilder().Build();
+            using IServiceScope serviceScope = host.Services.CreateScope();
+            IServiceProvider provider = serviceScope.ServiceProvider;
+            var botInstance = provider.GetService<BotService>();
+            botInstance.MainAsync().GetAwaiter().GetResult();
+            host.Run();
         }
 
-        static async Task MainAsync()
+        static IHostBuilder CreateDefaultBuilder()
         {
-            var token = "";
-
-            using(StreamReader r = new StreamReader("appsettings.json"))
-            {
-                string json = r.ReadToEnd();
-                var data = JsonConvert.DeserializeObject<appsettings>(json);
-                token = data?.token ?? "";
-            }
-
-            var discord = new DiscordClient(new DiscordConfiguration()
-            {
-                Token = token,
-                TokenType = TokenType.Bot
-            });
-
-            discord.MessageCreated += async (s, e) =>
-            {
-                if (e.Message.Content.ToLower().StartsWith("ping"))
-                    await e.Message.RespondAsync("pong!");         
-
-            };
-
-            await discord.ConnectAsync();
-            await Task.Delay(-1);
+            return Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration(app =>
+                {
+                    app.SetBasePath(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
+                    app.AddJsonFile("appsettings.json");
+                })
+                .ConfigureServices(services =>
+                {
+                    services.AddSingleton<BotService>();
+                });
         }
     }
 }
